@@ -1,6 +1,9 @@
 node(){
     stage('Cloning Git') {
-        git url: 'ssh://git@github.com:anish8129/ShoppinngSite-Frontend.git', branch: 'wip'
+        checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+                  doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [],
+                  userRemoteConfigs: [[credentialsId: 'e12cc016-c59b-487c-87c4-ba9983ef09b9',
+                  url: 'https://github.com/anish8129/ShoppinngSite-Frontend.git']]])
     }
         
     stage('Install dependencies') {
