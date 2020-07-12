@@ -1,4 +1,4 @@
-node(){
+node('master'){
     stage('Cloning Git') {
       git 'https://github.com/anish8129/ShoppinngSite-Frontend'
     }
