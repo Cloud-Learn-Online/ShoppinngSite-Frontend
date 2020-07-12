@@ -1,6 +1,6 @@
 node(){
     stage('Cloning Git') {
-      checkout scm
+      git 'https://github.com/anish8129/ShoppinngSite-Frontend'
     }
         
     stage('Install dependencies') {
