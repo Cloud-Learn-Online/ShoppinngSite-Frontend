@@ -34,16 +34,12 @@ node('master'){
   
     stage('Deployment'){
       node('angular') {
-        stage('Unstashing'){
-          echo 'Unstash'
-          unstash 'buildArtifacts'
-          echo 'Artifacts copied'
-        }
-        stage('Deployment'){
-          echo 'Copy'
-          sh "yes | sudo cp -R bundle.tar.gz /var/www/shopping_app && cd /var/www/shopping_app && sudo tar -xvf bundle.tar.gz"
-          echo 'Copy completed'
-        }
+        echo 'Unstash'
+        unstash 'buildArtifacts'
+        echo 'Artifacts copied'
+        echo 'Copy'
+        sh "yes | sudo cp -R bundle.tar.gz /var/www/shopping_app && cd /var/www/shopping_app && sudo tar -xvf bundle.tar.gz"
+        echo 'Copy completed'
       }
     }
 }
