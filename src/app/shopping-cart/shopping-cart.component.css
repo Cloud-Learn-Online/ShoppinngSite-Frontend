@@ -1,0 +1,10 @@
+.trash{
+    color: black;
+}
+.trash:hover{
+    color: red;
+}
+
+td,th{
+    text-align: center;
+}
