@@ -1,0 +1,27 @@
+<div class="justify-content-center">
+    <div class="jumbotron cardPane m-auto">
+        <div class="form-group row">
+            <div class="col-sm-7">
+                <input class="form-control" #input [(ngModel)]='value' (input)="performFilter(input.value)" type='text' placeholder="Search items">
+            </div>
+            <div class="col-3 mt-2" *ngIf='value'>
+                Filtered By: {{value}}
+            </div>
+        </div>
+        <div class="card float-left" *ngFor="let item of filteredItems$| async" style="margin:5px;width:300px;">
+            <h4 class="card-header {{!item.stockout? 'bg-primary' : 'bg-secondary'}}">{{item.item_name}}</h4>    
+            <div class="card-body">
+                <p class="card-text">Example text some text</p>
+                <p> Doe is an architech</p>
+                <a routerLink="/products/{{item.id}}" title="{{!item.stockout? 'In Stock' : 'Out of Stock'}}" class="btn {{!item.stockout? 'bg-primary' : 'bg-secondary'}}">Details</a>
+                <a  title="{{!item.stockout? 'In Stock' : 'Out of Stock'}}" class=" ml-5 btn {{!item.stockout? 'bg-primary' : 'bg-secondary disabled'}}" (click)='addItemToCart(item)'>Add to Cart</a>
+            </div>    
+        </div>
+        <div class="justify-content-center m-4" *ngIf="(filteredItems$|async)?.length<1">
+            <p> No items found</p>
+        </div>
+        
+    </div>
+    <jw-pagination class="pagination mt-2" [items]="items" (changePage)="onChangePage($event)">
+    </jw-pagination>
+</div>

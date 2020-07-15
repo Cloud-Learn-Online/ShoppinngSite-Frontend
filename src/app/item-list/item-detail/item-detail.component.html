@@ -1,0 +1,54 @@
+<div class="card rounded border-top-0" style="width:700px;margin:20px" *ngIf='item' >
+    <h4 class='card-header {{!item.stockout ? "bg-primary mb-2 rounded text-light":"bg-secondary"}}'>
+        {{item.item_name}}
+    </h4>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-7 ml-3">
+                <p class="card-text"><b>Description:</b>{{item.description}}</p>
+                <p class="card-text"><b>Price:</b>{{item.item_price|currency}}</p>
+                <p class="card-text"><b>Ratings:</b>{{item.ratings}}</p>
+                <p class="card-text">{{!item.stockout ? 'In Stock Grab it Fast':"Out of Stock Have Patience"}}</p>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="btn-group btn-block" *ngIf="!item.stockout" role="group" aria-label="First group">
+                            <a class='btn border-right {{!item.stockout ? "btn-primary":"btn-secondary disabled"}}'>
+                                {{!item.stockout ? "Place Order":"Out of the Stock"}}
+                            </a>
+                            <a class='btn border-left {{!item.stockout ? "btn-primary":"btn-secondary disabled"}}' (click)='addToCart(item)'>
+                                    {{!item.stockout ? "Add to Cart":"Out of the Stock"}}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-7">
+                        <a class="btn {{!item.stockout ? 'btn-primary':'btn-secondary'}} text-light" (click)='navigateBack()'>Back</a>
+                    </div>    
+                    <div class="col-5">
+                        <div class="input-group mb-3" *ngIf="!item.stockout">
+                            <div class="input-group-prepend">
+                                <a class="btn bg-primary border-primary text-light {{decrease_Quantity}}" (click)="decreaseQuantity()">-</a>    
+                            </div>
+                            <input type="text" class="form-control" readonly="readonly" [(ngModel)]="ordered_Quantity">
+                            <div class="input-group-append">
+                                <a class="btn bg-primary border-primary text-light {{increase_Quantity}}" (click)="increaseQuantity()">+</a>    
+                            </div>    
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 border-left">
+                <p href='#' class="float-right"><i class="fa fa-mobile fa-5x" aria-hidden="true"></i></p>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <div class="card" style="width:700px;margin:20px" *ngIf="!item">
+        <div class="card-body">
+            <h4 class="card-title">Error</h4>
+            <p class="card-text">No Item Found with this {{id}}</p>
+        </div>
+    </div>
+</div>
