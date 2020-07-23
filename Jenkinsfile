@@ -1,6 +1,6 @@
 node('master'){
     stage('Cloning Git') {
-      git 'https://github.com/anish8129/ShoppingSite-Frontend'
+      git 'https://github.com/Cloud-Learn-Online/ShoppingSite-Frontend.git'
     }
         
     stage('Install dependencies') {
