@@ -1,66 +1,89 @@
 import { Injectable } from '@angular/core';
 import { Item } from '../models/item';
-import { Observable, throwError, BehaviorSubject } from 'rxjs';
+import { Observable, throwError, BehaviorSubject, combineLatest } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { tap, catchError, map, filter, flatMap } from "rxjs/operators";
 import { IResponce } from '../models/responce';
-import { ShoppingCart } from '../models/shoppingCart';
-import { ShoppingCartItems } from '../models/shoppingCartItems';
+import { IShoppingCart } from '../models/shoppingCart';
+import { IShoppingCartReq } from '../models/shoppingCartReq';
+import { IShoppingCartItems } from '../models/shoppingCartItems';
+import { CartItem } from '../models/cartItem';
+import { Apis } from '../config/api-list';
+import { ErrorHandlerService } from './error-handler.service';
+import { Router } from '@angular/router';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ShoppingCartService {
 
-  private shoppingCartUrl=`http://localhost:6060/shoppingSite/shoppingSite/4/cart/items`;
-  noOfShoppingCartItems = 0;
-  private responce$ = this.http.get<IResponce<ShoppingCart>>(this.shoppingCartUrl).
-                      pipe(map(x=>x.data));
-   
-  cartItemSub = new BehaviorSubject<number>(this.noOfShoppingCartItems); 
-  cartItemObserv$= this.cartItemSub.asObservable();
-  constructor(private http : HttpClient) {
+  private apis: Apis = new Apis();
+  private cartItemCountSubject = new BehaviorSubject<number>(0);
+  cartItemCount$ = this.cartItemCountSubject.asObservable();
+
+  constructor(private http: HttpClient,
+    private errorHandler: ErrorHandlerService,
+    private router: Router,
+    private authService: AuthService) {}
+
+  addItemToCart(email: string, item_: Item, quantity_: number) {
+    let cartItem: IShoppingCartItems = {
+      id: 0,
+      item: item_,
+      quantity: quantity_
+    };
+    if (this.authService.isUserLoggedIn()) {
+      this.http.post<IResponce<IShoppingCartReq>>(this.apis.addItemsToCart + `/${email}`, cartItem).subscribe(
+        ()=>{
+          this.updateCartItemsCount(email)
+        }
+      );
+      
+    } else
+      this.router.navigate(['/login']);
   }
 
-  addItemToCart(item_:Item, quantity_: number){
-
-    let cartItem :ShoppingCartItems ={
-       id:0,
-       item:item_,
-       quantity:quantity_  
-      };
-      let url='http://localhost:6060/shoppingSite/shoppingSite/4/cart/add';
-      this.http.post<IResponce<ShoppingCart>>(url,cartItem).subscribe();
-      this.noOfShoppingCartItems++;
-      this.cartItemSub.next(this.noOfShoppingCartItems);
-  }
-
-
-  removeItemFromCart(cartItemId:number){
-    this.http.delete<IResponce<String>>
-    (`http://localhost:6060/shoppingSite/shoppingSite/4/cart/items/remove/${cartItemId}`)
-    .subscribe();
-    this.noOfShoppingCartItems--;
-    this.cartItemSub.next(this.noOfShoppingCartItems);
-  }
-
-  getListOfCartItems():Observable<ShoppingCartItems[]>{
-   let x$=this.responce$.pipe(
-      map(responce => responce.cart_items as ShoppingCartItems[]),
-      catchError(this.handleError)
-    );
-    return x$;
-  }
-
-  private handleError(err: HttpErrorResponse) {
-    let errorMessage = "";
-    if (err.error instanceof ErrorEvent) {
-      errorMessage = `An error occured: ${err.error.message}`;
-    } else {
-      errorMessage = `Server returned code: ${err.status},error message is: ${err.message}`;
+  updateCartItemsCount(email: string) {
+    if (this.authService.isUserLoggedIn()) {
+      let count = 0;
+      this.http.get<IResponce<number>>(this.apis.getItemsCount + `/${email}`)
+        .pipe(
+          map(responce =>responce.data)
+        ).subscribe(
+          res =>{
+            this.cartItemCountSubject.next(res);
+          });
     }
-    console.error(errorMessage);
-    return throwError(errorMessage);
   }
 
+  removeItemFromCart(email: string, cartItemId: number) {
+    if (this.authService.isUserLoggedIn()) {
+      return this.http.delete<IResponce<String>>(
+        this.apis.deleteItemsFromCart + `/${email}/${cartItemId}`,{observe: 'response'}).pipe(
+          map(resp=> {
+              if (resp.status === 200){
+                this.updateCartItemsCount(email);
+                return resp.body;
+              }
+              else
+                catchError(this.errorHandler.handleError)
+      }))
+    }
+  }
+
+  getListOfCartItems(email: String): Observable<CartItem[]> {
+    if (this.authService.isUserLoggedIn()) {
+      let responce = this.http.get<IResponce<IShoppingCart>>(this.apis.getCartItems + `/${email}`).
+        pipe(map(x => x.data));
+      let x$ = responce.pipe(
+        map(responce => {
+          console.log(responce);
+          return responce.cartItems as CartItem[]
+        }),
+        catchError(this.errorHandler.handleError)
+      );
+      return x$;
+    }
+  }
 }

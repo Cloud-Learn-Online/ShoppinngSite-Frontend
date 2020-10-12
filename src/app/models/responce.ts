@@ -1,6 +1,6 @@
 export interface IResponce<T>{
-  
-    date: Date;
-    status: String;
+    time: Date;
+    message:string;
+    status: string;
     data: T; 
 }

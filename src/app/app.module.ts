@@ -1,5 +1,4 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { JwPaginationComponent } from 'jw-angular-pagination';
@@ -9,9 +8,17 @@ import { ItemDetailComponent } from './item-list/item-detail/item-detail.compone
 import { ShoppingCartComponent } from './shopping-cart/shopping-cart.component';
 import { TopBarComponent } from './top-bar/top-bar.component';
 import { HomeComponent } from './home/home.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { ItemComponent } from './item/item.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { AppRoutingModule } from './app-routing.module';
+import { RegisterComponent } from './register/register.component';
+import { OrderComponent } from './order/order.component';
+import { UserDetailsComponent } from './user-details/user-details.component';
+import { AuthService } from './service/auth.service';
+import { AuthGuard } from './service/auth.guard';
+import { TokenInterceptorService } from './service/token-interceptor.service';
 
 @NgModule({
   declarations: [
@@ -24,22 +31,24 @@ import { ItemComponent } from './item/item.component';
     JwPaginationComponent,
     LoginComponent,
     ItemComponent,
+    RegisterComponent,
+    OrderComponent,
+    UserDetailsComponent,
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule,
-    RouterModule.forRoot([
-      {path:'home' ,component:HomeComponent},
-      {path:'products' , component:ItemListComponent},
-      {path:'products/:id' , component:ItemDetailComponent},
-      {path:'cart' , component:ShoppingCartComponent},
-      {path:'admin/manageItems' , component:ItemComponent},
-      {path:'login' , component:LoginComponent},
-      {path:'', redirectTo:'home' ,pathMatch:'full'},
-    ])
+    AppRoutingModule,
+    FormsModule,
+    ReactiveFormsModule
   ],
-  providers: [],
+  providers: [AuthService, AuthGuard, 
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptorService,
+      multi: true
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

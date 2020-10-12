@@ -9,16 +9,16 @@
           </tr>
         </thead>
         <tbody >
-          <tr *ngFor="let cartItem of cartItems$| async ">
-            <td routerLink="/products/{{cartItem.item.id}}" routerLinkActive="active"><img src="" alt="No Image" style="width:100px;height:100px"/></td>
-            <td routerLink="/products/{{cartItem.item.id}}" routerLinkActive="active">{{cartItem.item.item_name}}</td>
-            <td>{{cartItem.item.item_price}}</td>
+          <tr *ngFor="let cartItem of cartItems$ | async">
+            <td routerLink="/products/{{cartItem.id}}" routerLinkActive="active"><img src="" alt="No Image" style="width:100px;height:100px"/></td>
+            <td routerLink="/products/{{cartItem.itemId}}" routerLinkActive="active">{{cartItem.itemName}}</td>
+            <td>{{cartItem.itemPrice}}</td>
             <td>{{cartItem.quantity}}</td>
             <td><i class="fa fa-trash fa-lg trash" title="Remove from Cart"
               (click)="removeItemFromCart(cartItem.id)" ></i></td>
           </tr>
         </tbody>
-        <tbody *ngIf="(cartItems$|async)?.length<1">
+        <tbody *ngIf="(cartItems$ |async)?.length<1">
           <tr><td colspan="5"> Sorry You Have no Items in your Cart</td></tr>
         </tbody>
 </table>

@@ -1,45 +1,40 @@
-import { Component, OnInit, OnChanges } from '@angular/core';
-import { Item } from '../models/item';
+import { Component, ErrorHandler } from '@angular/core';
 import { ShoppingCartService } from '../service/shopping-cart.service';
-import {map} from 'rxjs/operators';
-import { ShoppingCart } from '../models/shoppingCart';
-import { ShoppingCartItems } from '../models/shoppingCartItems';
-import {combineLatest, BehaviorSubject } from 'rxjs';
+import { CartItem } from '../models/cartItem';
+import {BehaviorSubject, Subject, Observable } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-shopping-cart',
   templateUrl: './shopping-cart.component.html',
   styleUrls: ['./shopping-cart.component.css']
 })
-export class ShoppingCartComponent implements OnInit {
+export class ShoppingCartComponent {
 
-  cartSubject = new BehaviorSubject<number>(-1);
+  cartSubject = new Subject<number>();
+  removedItemSubject = new BehaviorSubject<number>(0);
   cartAction$= this.cartSubject.asObservable();
+  email:string = (this.route.snapshot.paramMap.get('email'));
   errorMessage: String;
-  cartItems$= combineLatest([this.shoppingCartService.getListOfCartItems(),
-              this.cartAction$]).pipe(
-                map(([cartItems,cartItemId])=>{
-                  let foundCartItem = cartItems.findIndex(cartItem=> cartItem.id==cartItemId);
-                  if(foundCartItem !=-1)
-                    cartItems.splice(foundCartItem,1) as ShoppingCartItems[];
-                  return cartItems;
-                }));
 
-  constructor(private shoppingCartService: ShoppingCartService) {
-    
+  cartItems$ : Observable<CartItem[]>;
+
+  constructor(private shoppingCartService: ShoppingCartService,
+              private route:ActivatedRoute,
+              private errorHandler:ErrorHandler) {
+
+    this.getCartItems();
   }
-  
-
-  ngOnInit() {
-    this.cartItems$.subscribe(x=>{
-      x.filter(val=>console.log("constructor"+val))});
+              
+  removeItemFromCart(cartItemId:number, _event){
+    this.shoppingCartService.removeItemFromCart(this.email, cartItemId)
+    .subscribe(
+      ()=>{this.getCartItems()}
+    );
   }
 
-  removeItemFromCart(cartItemId:number,_event){
-   // event.stopPropagation();
-   //event.stopImmediatePropagation();
-    console.log(cartItemId);
-    this.shoppingCartService.removeItemFromCart(cartItemId);
-    this.cartSubject.next(cartItemId);
+  getCartItems() {
+    this.cartItems$ = this.shoppingCartService.getListOfCartItems(this.email)
   }
 }
+         

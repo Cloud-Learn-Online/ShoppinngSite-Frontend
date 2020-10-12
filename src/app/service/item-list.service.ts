@@ -1,35 +1,25 @@
-import { Injectable } from '@angular/core';
+import { Injectable, ErrorHandler } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Observable, throwError, BehaviorSubject } from "rxjs";
 import { tap, catchError, map, filter, flatMap } from "rxjs/operators";
 import { Item } from '../models/item';
 import { IResponce } from '../models/responce';
 import { of } from "rxjs";
+import { Apis } from '../config/api-list';
+import { ErrorHandlerService } from './error-handler.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ItemListService {
-  private itemUrl = "http://localhost:6060/shoppingSite/shoppingSite/Items/list";
-
+  private apis:Apis = new Apis();
   private items:Item[]=[]; 
   
-  private responce$ =this.http.get<IResponce<Item[]>>(this.itemUrl);
+  private responce$ =this.http.get<IResponce<Item[]>>(this.apis.getItems);
   item$= this.responce$.pipe(
             map(x=>x.data),
-            catchError(this.handleError));
+            catchError(this.errorHandler.handleError));
 
-  constructor(private http: HttpClient) {
-  }
-
-  private handleError(err: HttpErrorResponse) {
-    let errorMessage = "";
-    if (err.error instanceof ErrorEvent) {
-      errorMessage = `An error occured: ${err.error.message}`;
-    } else {
-      errorMessage = `Server returned code: ${err.status},error message is: ${err.message}`;
-    }
-    console.error(errorMessage);
-    return throwError(errorMessage);
+  constructor(private http: HttpClient, private errorHandler:ErrorHandlerService) {
   }  
 }

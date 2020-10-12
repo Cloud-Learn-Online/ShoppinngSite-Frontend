@@ -125,6 +125,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "shopping-site"
+    }
+  },
+  "defaultProject": "shopping-site",
+  "cli": {
+    "analytics": false
+  }
 }
